@@ -35,6 +35,7 @@ func Read(conn net.Conn, msg func(string)) {
 			fmt.Println("Server closed its connection")
 			os.Exit(0)
 		}
+		str = strings.TrimSpace(str)
 		msg(str)
 	}
 }
