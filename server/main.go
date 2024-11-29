@@ -51,7 +51,7 @@ func main() {
 					}
 					payload <- &msgpayload{
 						clientid: &clientid,
-						message:  fmt.Sprintf("Client %d > %s", clientid, inc),
+						message:  fmt.Sprintf("Client %d: %s", clientid, inc),
 					}
 				}
 				disconnected <- conn

@@ -5,7 +5,7 @@ CLIENT_BIN := bin/client
 
 all: build
 
-build: $(SERVER_BIN) $(CLIENT_BIN)
+build: clean $(SERVER_BIN) $(CLIENT_BIN)
 
 $(SERVER_BIN): server
 	cd server && go build -o ../$(SERVER_BIN)
