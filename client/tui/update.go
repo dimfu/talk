@@ -10,7 +10,14 @@ import (
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case message:
-		m.messages = append(m.messages, m.senderStyle.Render("You: ")+msg.str)
+		m.messages = append(m.messages,
+			(func() string {
+				if msg.sender == "SYSTEM" {
+					return m.notifStyle.Render(msg.str)
+				}
+				return m.senderStyle.Render(msg.sender) + " " + msg.str
+			})(),
+		)
 		m.viewport.SetContent(strings.Join(m.messages, "\n"))
 		m.viewport.GotoBottom()
 		return m, nil

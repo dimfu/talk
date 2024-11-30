@@ -14,11 +14,9 @@ $(CLIENT_BIN): client
 	cd client && go build -o ../$(CLIENT_BIN)
 
 run_server:
-	@echo "Running server..."
 	./$(SERVER_BIN)
 
 run_client:
-	@echo "Running client..."
 	./$(CLIENT_BIN)
 
 clean:

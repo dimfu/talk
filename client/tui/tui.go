@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textarea"
@@ -15,7 +16,8 @@ import (
 )
 
 type message struct {
-	str string
+	str    string
+	sender string
 }
 
 type model struct {
@@ -23,6 +25,7 @@ type model struct {
 	messages    []string
 	textarea    textarea.Model
 	senderStyle lipgloss.Style
+	notifStyle  lipgloss.Style
 	err         error
 	conn        net.Conn
 }
@@ -32,7 +35,6 @@ func Read(conn net.Conn, msg func(string)) {
 	for {
 		str, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Println("Server closed its connection")
 			os.Exit(0)
 		}
 		str = strings.TrimSpace(str)
@@ -51,10 +53,21 @@ func StartTui() {
 	p := *tea.NewProgram(m)
 
 	go Read(conn, func(s string) {
-		receive := message{
-			str: s,
-		}
-		p.Send(receive)
+		re := regexp.MustCompile(`(\[.*?\])\s*(.*)`)
+		match := re.FindStringSubmatch(s)
+
+		p.Send(func() message {
+			if len(match) > 2 {
+				return message{
+					sender: match[1],
+					str:    match[2],
+				}
+			}
+			return message{
+				sender: "SYSTEM",
+				str:    s,
+			}
+		}())
 	})
 
 	if _, err = p.Run(); err != nil {
@@ -88,6 +101,7 @@ Type a message and press Enter to send.`)
 		messages:    []string{},
 		viewport:    vp,
 		senderStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("5")),
+		notifStyle:  lipgloss.NewStyle().Foreground(lipgloss.Color("8")),
 		err:         nil,
 	}
 	return m

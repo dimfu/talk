@@ -43,10 +43,11 @@ func (c *client) read() error {
 }
 
 func (c *client) handle(inc string) {
+	msg := append([]byte(fmt.Sprintf("[Client %d] ", c.id)), inc...)
 	c.outbound <- command{
 		id:     MSG,
 		sender: fmt.Sprint(c.id),
-		body:   []byte(inc),
+		body:   msg,
 		client: c,
 	}
 }

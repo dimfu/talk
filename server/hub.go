@@ -35,7 +35,6 @@ func (h *hub) run() {
 				h.message(cmd.client, cmd.body)
 			default:
 			}
-
 		}
 	}
 }
@@ -43,9 +42,8 @@ func (h *hub) run() {
 func (h *hub) broadcast(from *client, m []byte) {
 	for conn, client := range h.clients {
 		var err error
-		if client.id != from.id {
-			msg := append([]byte(fmt.Sprintf("Client %d: ", from.id)), m...)
-			_, err = conn.Write(msg)
+		if from == nil || client.id != from.id {
+			_, err = conn.Write(m)
 		}
 
 		if err != nil {
@@ -57,16 +55,16 @@ func (h *hub) broadcast(from *client, m []byte) {
 func (h *hub) register(c *client) {
 	clientCounts := len(h.clients)
 	if _, exists := h.clients[c.conn]; !exists {
-		log.Printf("accepted new connection from %s", c.conn.RemoteAddr().String())
 		c.id = clientCounts
 		h.clients[c.conn] = c
+		h.broadcast(c, []byte(fmt.Sprintf("> Client %d logged on\n", c.id)))
 	}
 }
 
 func (h *hub) deregister(c *client) {
 	if _, exists := h.clients[c.conn]; exists {
-		log.Printf("%s is disconnected", c.conn.RemoteAddr().String())
 		delete(h.clients, c.conn)
+		h.broadcast(c, []byte(fmt.Sprintf("> Client %d logged off\n", c.id)))
 	}
 }
 
